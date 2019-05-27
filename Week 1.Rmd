@@ -1,0 +1,14 @@
+---
+title: "Week 1"
+author: "Ezinne Nwankwo"
+date: "5/27/2019"
+output: html_document
+---
+
+## Exercises 
+
+```{r}
+
+
+
+```
