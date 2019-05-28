@@ -1,0 +1,272 @@
+---
+title: "Weeks 1-2: 8/29 - 9/5"
+author: "Ezinne Nwankwo"
+date: "5/27/2019"
+output: html_document
+---
+
+
+
+## Exercise 1
+
+- If x is greater than 3 and y is less than or equal to 3 then print "Hello world!"
+- Otherwise if x is greater than 3 print "!dlrow olleH"
+- If x is less than or equal to 3 then print "Something else ..."
+- Stop execution if x is odd and y is even and report an error, don't print any of the text strings above.
+
+```{r}
+
+x <- 1
+y <- 1
+
+if ((x %% 2 != 0) & (y %% 2 == 0)) {
+  stop("There is an error.")
+} else if (x > 3 & y <= 3) { 
+  print("Hello World")
+} else if (x > 3) {
+  print("!dlrow olleH")
+} else if (x < 3 | x == 3) {
+  print("Something else ...")
+  }
+
+
+```
+
+
+## Exercise 2
+Below is a vector containing all prime numbers between 2 and 100:
+
+primes = c( 2,  3,  5,  7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 
+      43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97)
+      
+If you were given the vector x = c(3,4,12,19,23,51,61,63,78), write the R code necessary to print only the values of x that are not prime (without using subsetting or the %in% operator).
+
+Your code should use nested loops to iterate through the vector of primes and x.
+
+```{r}
+primes <- c( 2,  3,  5,  7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 
+            43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97)
+
+num <- c(3,4,12,19,23,51,61,63,78)
+for (x in num) {
+  for (y in primes){
+      if (x == y){
+        x_prime = c(x) # Make a list of primes in num
+      }
+  }
+  if (x != x_prime){ # Print non-prime numbers in num
+    print(x)
+  }
+}
+
+```
+
+
+## Exercise 3 - Part 1
+What is the type of the following vectors? Explain why they have that type.
+
+- c(1, NA+1L, "C")
+- c(1L / 0, NA)
+- c(1:3, 5)
+- c(3L, NaN+1L)
+- c(NA, TRUE)
+
+```{r}
+typeof( c(1, NA+1L, "C") )
+
+typeof( c(1L / 0, NA) )
+
+typeof( c(1:3, 5) )
+
+typeof( c(3L, NaN+1L) )
+
+typeof( c(NA, TRUE) )
+
+```
+
+
+
+## Exercise 3 - Part 2
+
+
+Considering only the four (common) data types, what is R's implicit type conversion hierarchy (from highest priority to lowest priority)?
+
+logical < integer < double < character
+
+
+### Some notes
+
+- Atomic vectors: vectors formed by no explicit command and must comtain same type of object (i.e. 1:3)
+- Generic vectors or recursive vectors: 1 dimenional and contain any type of object (i.e list()), and can contain other lists
+  - Coerce list to atomic vectorm using unlist()
+
+
+## Exercise 4 
+
+Represent the following JSON data as a list in R.
+
+```{r}
+str(list(
+  "firstName" = "John",
+  "lastName" = "Smith",
+  "age" = 25,
+  "address" = list(
+    "streetAddress" = "21 2nd Street",
+    "city" ="New York",
+    "state" = "NY",
+    "postalCode"= 10021
+    ),
+  "phoneNumber" = list( 
+  
+    list(
+      "type" = "home",
+      "number"= "212 555-1239"
+      ),
+    list(
+      "type" = "fax",
+      "number" = "646 555-4567"
+      )
+    )
+  )
+)
+
+```
+
+## Exercise 5 
+
+Construct a factor variable (without using factor, as.factor, or related functions) that contains the weather forecast for Los Angeles over the next 7 days.
+
+- There should be 5 levels - sun, partial clouds, clouds, rain, snow.
+
+- Start with an integer vector and add the appropriate attributes.
+
+
+```{r}
+
+y <- c(2L, 2L, 2L, 2L, 1L, 1L, 1L, 1L)
+levels = c("sun", "partial clouds", "clouds", "rain", "snow")
+
+attr(y, "levels") = levels
+attr(y, "class") = "factor"
+```
+
+
+## Exercise 6 
+
+Below are 100 values,
+
+x = c(56, 3, 17, 2, 4, 9, 6, 5, 19, 5, 2, 3, 5, 0, 13, 12, 6, 31, 10, 21, 8, 4, 1, 1, 2, 5, 16, 1, 3, 8, 1,
+      3, 4, 8, 5, 2, 8, 6, 18, 40, 10, 20, 1, 27, 2, 11, 14, 5, 7, 0, 3, 0, 7, 0, 8, 10, 10, 12, 8, 82,
+      21, 3, 34, 55, 18, 2, 9, 29, 1, 4, 7, 14, 7, 1, 2, 7, 4, 74, 5, 0, 3, 13, 2, 8, 1, 6, 13, 7, 1, 10,
+      5, 2, 4, 4, 14, 15, 4, 17, 1, 9)
+
+write down how you would create a subset to accomplish each of the following:
+
+- Select every third value starting at position 2 in x.
+
+- Remove all values with an odd index (e.g. 1, 3, etc.)
+
+- Remove every 4th value, but only if it is odd.
+
+
+```{r}
+
+
+x <- c(56, 3, 17, 2, 4, 9, 6, 5, 19, 5, 2, 3, 5, 0, 13, 12, 6, 31, 10, 21, 8, 4, 1, 1, 2, 5, 16, 1, 3, 8, 1,
+      3, 4, 8, 5, 2, 8, 6, 18, 40, 10, 20, 1, 27, 2, 11, 14, 5, 7, 0, 3, 0, 7, 0, 8, 10, 10, 12, 8, 82,
+      21, 3, 34, 55, 18, 2, 9, 29, 1, 4, 7, 14, 7, 1, 2, 7, 4, 74, 5, 0, 3, 13, 2, 8, 1, 6, 13, 7, 1, 10,
+      5, 2, 4, 4, 14, 15, 4, 17, 1, 9)
+
+
+## Part 1 
+
+x[seq(2, length(x), by=3)]
+
+## Part 2 
+
+x[-seq(1,length(x), by = 2)]
+
+## Part 3
+
+seq(1, length(x), by=4) # Pos int sub
+x %% 2 == 1 # Log vec sub
+
+x[ !(c(TRUE, FALSE, FALSE, FALSE) & (x %% 2 == 1)) ]
+```
+
+
+## Homework 1 
+
+### Task 1 - Implement FizzBuzz
+Your goal here is to implement FizzBuzz as a generalized function in R called fizzbuzz. Your fizzbuzz function should conform to the description provided above in terms of output, but should accept an integer argument (which can either be a scalar or vector). As such, your function should correctly print Fizz, Buzz, FizzBuzz, or the actual number for each integer supplied on a separate line. You should program defensively - validate any input and make sure that you have a sane response to any invalid input.
+
+You must also include a write up of your implementation that broadly describes how you approached the problem and constructed your solution (think something along the lines of the methods section of a journal article).
+
+This is not a terribly complex or difficult task, and solutions in R and many other languages are easily Googleable - the point of this exercise is to get use to the workflow and tools we will be using in this class. This includes RStudio, RMarkdown, git, GitHub, Wercker, etc. - so use this homework as opportunity to familiarize yourself and get comfortable with these tools as we will be using them throughout the rest of the semester.
+
+### Task 2 - FizzBuzz validation
+Use your FizzBuzz function to display the correct output for a variety of inputs, make sure to show what happens for both good and bad input. Some sample test cases have been provided in the template, feel free to add additional test cases you think are interesting / useful.
+
+```{r, error=TRUE}
+
+
+fizzbuzz <- function(x){
+  if (is.character(x) == TRUE ){
+    stop("Invalid input. Must be a scalar or vector.") 
+  } else if (is.complex(x) == TRUE){
+    stop("Invalid input. Must be a scalar or vector.") 
+  } else if (is.finite(x[1])  == FALSE){
+    stop("Invalid input. Must be a scalar or vector.") 
+  } else if ( x[1] < 0 ){
+    stop("Invalid input. Must be a scalar or vector.") 
+  } else if (is.integer(x) == FALSE | is.double(x) == FALSE){
+    new.x <- as.integer(x)
+    if (new.x[1] < x[1]){
+      stop("Invalid input. Must be a scalar or vector.") 
+    }
+  } 
+  
+  for (i in 1:length(x)){
+      if (x[i] %% 3 == 0 & x[i] %% 5 == 0){
+        print("FizzBuzz")
+      } else if (x[i] %% 3 == 0) {
+        print("Fizz")
+      } else if (x[i] %% 5 == 0) {
+        print("Buzz")
+      } else {
+        print(x[i])
+      }
+    
+  }
+
+  
+}
+
+
+# Validation 
+
+## Good inputs 
+
+fizzbuzz(1)
+fizzbuzz(3)
+fizzbuzz(5)
+fizzbuzz(15)
+fizzbuzz(9:15)
+fizzbuzz(15:9)
+
+
+## Bad inputs
+
+fizzbuzz(-1)
+fizzbuzz(-3)
+fizzbuzz(-5)
+fizzbuzz(Inf)
+fizzbuzz(-Inf)
+fizzbuzz("A")
+fizzbuzz(1.5)
+fizzbuzz(1i)
+fizzbuzz(4i)
+
+
+
+```
