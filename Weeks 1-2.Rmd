@@ -211,6 +211,14 @@ Use your FizzBuzz function to display the correct output for a variety of inputs
 
 
 fizzbuzz <- function(x){
+  # Returns "Fizz" if multple of 3, "Buzz" if multiple of 5, and        "FizzBuzz if multiple of 3 or 5, and the value if neither.
+  #
+  # Args:
+  #   x: a scalar or vector. if input is character, complex, infinite, or negative, or a rational number then error message will appear
+  #   
+  #
+  # Returns:
+  #   Fizz, Buzz, FizzBuzz, or original value
   if (is.character(x) == TRUE ){
     stop("Invalid input. Must be a scalar or vector.") 
   } else if (is.complex(x) == TRUE){
