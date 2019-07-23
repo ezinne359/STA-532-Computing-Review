@@ -1,0 +1,426 @@
+---
+title: "Weeks 3-4"
+author: "Ezinne Nwankwo"
+date: "5/28/2019"
+output: html_document
+---
+
+
+```{r libraries}
+
+library(dplyr)
+library(purrr)
+library(tidyverse)
+library(ggplot2)
+#install.packages("repurrrsive")
+library(repurrrsive)
+
+```
+
+## Exercise 1 
+
+How many flights to Los Angeles (LAX) did each of the legacy carriers (AA, UA, DL or US) have in May from JFK, and what was their average duration?
+
+```{r}
+
+
+#install.packages("nycflights13")
+library(nycflights13)
+
+flights %>% filter(dest == "LAX") %>%
+  filter(origin == "JFK") %>% 
+  filter(month == 5) %>% 
+  filter(carrier %in% c("AA","UA","DL","US")) %>% 
+  group_by(carrier) %>% 
+  summarise(
+    n = n(), 
+    avg_dur = mean(air_time, na.rm = TRUE)
+  )
+
+```
+
+
+## Exercise 2 
+
+What was the shortest flight out of each airport in terms of distance? In terms of duration?
+
+```{r}
+
+#distance
+flights %>% 
+  group_by(origin) %>%
+  filter(distance == min(distance))%>%
+  select(origin, dest, carrier, distance) %>%
+  arrange(origin, distance) %>% 
+  distinct()
+
+#duration
+flights %>% 
+  group_by(origin) %>%
+  filter(air_time == min(air_time, na.rm = TRUE))%>%
+  select(origin, dest, carrier, air_time) %>%
+  arrange(origin, air_time) %>% 
+  distinct()
+
+```
+
+
+
+## Exercise 3
+
+
+Which plane (check the tail number) flew out of each New York airport the most?
+
+
+```{r}
+
+flights %>% 
+  group_by(origin, tailnum) %>% 
+  filter(!is.na(tailnum)) %>%
+  summarise(n = n()) %>% 
+  filter(n == max(n))
+
+```
+
+
+
+## Exercise 4 
+
+Which date should you fly on if you want to have the lowest possible average departure delay? What about arrival delay?
+
+
+```{r}
+
+## lowest avg departure delay
+flights %>% 
+  mutate(date = paste(year, month, day, sep="/")) %>%
+  group_by(date) %>%
+  mutate(dep_delay = ifelse(dep_delay < 0, 0, dep_delay)) %>%
+  summarize(
+    avg_dep_delay = mean(dep_delay, na.rm = TRUE)
+  ) %>%
+  filter(avg_dep_delay == min(avg_dep_delay))
+
+## arrival delay 
+flights %>% 
+  mutate(date = paste(year, month, day, sep="/")) %>%
+  group_by(date) %>%
+  mutate(arr_delay = ifelse(arr_delay < 0, 0, arr_delay)) %>%
+  summarize(
+    avg_arr_delay = mean(arr_delay, na.rm = TRUE)
+  ) %>%
+  filter(avg_arr_delay == min(avg_arr_delay))
+  
+
+```
+
+
+
+## Exercise 5
+
+The line data set is an example included in the coda package containing mcmc posterior samples from a linear regression model. Use tidyr to adjust the data frame such that you can use ggplot2 to create trace plots or dplyr to calculate summary statistics.
+
+
+```{r}
+
+library(coda)
+data(line,package = "coda")
+d = as_data_frame(line[["line1"]])
+
+
+df_tidy <- d %>% 
+  mutate(
+    iteration = 1:n()
+  ) %>%
+  gather(parameter, value, -iteration)
+
+df_tidy %>% 
+  group_by(parameter) %>% 
+  summarise(
+    post_mean = mean(value),
+    post_med = median(value)
+  )
+
+
+ggplot(df_tidy, aes(x=iteration, y=value, color=parameter)) + 
+  geom_line() + 
+  facet_wrap(~parameter)
+
+
+``` 
+
+
+## Exercsie 6 
+
+Using the sw_people data set in the repurrrsive package, extract the name of all of the characters using: 
+
+- a for loop 
+- an apply function 
+
+```{r}
+
+data(sw_people)
+
+sw_for_loop = function() {
+  names = c()
+  for (i in 1:length(sw_people)){
+    names <-c(names, sw_people[[i]]$name)
+  } 
+  names
+}
+
+
+
+sw_sapply = function(feature) {
+  sapply(sw_people, function(x) x[["feature"]])
+}
+
+
+#install.packages("bench")
+bench::mark(
+  sw_for_loop(),
+  sw_sapply()
+)
+```
+
+
+## Exercise 7 
+
+Using the sw_people data set in the repurrrsive package, generate a tidy data frame (tibble) containing as many details as possible.
+
+```{r}
+
+# Viewing Structure
+str(sw_people)
+View(sw_people)
+
+# Extracting
+map_chr(sw_people, "name")
+
+## doesn't work because the films vector can contain one actor in multiple films 
+map_chr(sw_people, "films") 
+
+## here we see that the first actor Luke Skywaker is in multiple films 
+sw_people[[1]]$films 
+
+## instead do map() so it just puts the results into a list
+map(sw_people, "films")[[1]]
+
+all(map_chr(sw_people, 1) == map_chr(sw_people, "name"))
+
+## Creating tidy date frame
+
+data_frame(
+  
+  name = map_chr(sw_people, "name"),
+  height = map_chr(sw_people, "height"), 
+  mass = map_chr(sw_people, "mass")
+)
+
+## Bad inputs 
+sw_people_copy <- sw_people
+sw_people_copy[[87]]$mass = NULL 
+
+data_frame(
+  
+  name = map_chr(sw_people_copy, "name"),
+  height = map_chr(sw_people_copy, "height"), 
+  mass = map_chr(sw_people_copy, "mass")
+)
+
+## can use traceback function to debug after running the function
+traceback()
+
+## NAs? 
+data_frame(
+  
+  name = map_chr(sw_people_copy, "name"),
+  height = map_chr(sw_people_copy, "height"), 
+  mass = map_chr(sw_people_copy, "mass", .default = NA), 
+  bad_length = 1:2
+)
+
+
+
+##Problem: Height and mass are numeric variables but we are reading them in as characters. Sometimes 
+##the map_int function doesn't work
+data_frame(
+  
+  name = map_chr(sw_people_copy, "name"),
+  height = map_int(sw_people_copy, "height"), 
+  mass = map_chr(sw_people_copy, "mass", .default = NA), 
+  bad_length = 1:2
+)
+
+## so instead try as.integer. When we use view, we see that their are NAs and unknowns
+
+### Bad
+data_frame(
+  
+  name = map_chr(sw_people, "name"),
+  height = map_chr(sw_people, "height") %>% as.integer(),
+  mass = map_chr(sw_people, "mass")
+) %>% View()
+
+### Better 
+
+data_frame(
+  
+  name = map_chr(sw_people, "name"),
+  height = map_chr(sw_people, "height") %>% {ifelse(. == "unknown", NA, .)} %>% 
+    as.integer(.),
+  mass = map_chr(sw_people, "mass")  %>% {ifelse(. == "unknown", NA, .)} %>% 
+    as.integer(.)
+) %>% View() 
+
+### Best
+### Helper Function to avoid duplicating code
+
+fix_integers <- function(v){
+  ifelse(v == "unknown", NA, v) %>% 
+    as.integer()
+  
+}
+
+data_frame(
+  
+  name = map_chr(sw_people, "name"),
+  height = map_chr(sw_people, "height") %>% fix_integers(),
+  mass = map_chr(sw_people, "mass")  %>% fix_integers() 
+) %>% View() 
+
+## But still getting errors on the mass column 
+
+
+d = data_frame(
+  
+  name = map_chr(sw_people, "name"),
+  height = map_chr(sw_people, "height") %>% fix_integers(),
+  mass = map_chr(sw_people, "mass")  %>% fix_integers() 
+) 
+
+##lets see where the problem is 
+is.na(d$mass)
+map_chr(sw_people, "mass")[is.na(d$mass)]
+
+as.integer("1,358")
+
+##the problem is the commoas so we need to get rid of before we process the data so we must update the fix function
+
+fix_integers <- function(v){
+  ifelse(v == "unknown", NA, v) %>% 
+    stringr::str_replace_all(",","") %>%
+    as.integer()
+  
+}
+
+data_frame(
+  
+  name = map_chr(sw_people, "name"),
+  height = map_chr(sw_people, "height") %>% fix_integers(),
+  mass = map_chr(sw_people, "mass")  %>% fix_integers() 
+) %>% View() 
+
+
+## gender
+
+d = data_frame(
+  
+  name = map_chr(sw_people, "name"),
+  height = map_chr(sw_people, "height") %>% fix_integers(),
+  mass = map_chr(sw_people, "mass")  %>% fix_integers(), 
+  gender = map_chr(sw_people, "gender")
+)
+
+View(d)
+
+unique(d$gender)
+
+## change na?
+
+fix_gender = function(v){
+  ifelse(v %in% c("n/a","none"), NA, v)
+}
+
+d = data_frame(
+  
+  name = map_chr(sw_people, "name"),
+  height = map_chr(sw_people, "height") %>% fix_integers(),
+  mass = map_chr(sw_people, "mass")  %>% fix_integers(), 
+  gender = map_chr(sw_people, "gender") %>% fix_gender()
+)
+
+View(d)
+
+
+## dyplr mutate
+
+d = data_frame(
+  
+  name = map_chr(sw_people, "name"),
+  height = map_chr(sw_people, "height"),
+  mass = map_chr(sw_people, "mass"), 
+  gender = map_chr(sw_people, "gender") 
+) %>% 
+  mutate(
+    height = fix_integers(height),
+    mass = fix_integers(mass), 
+    gender = fix_gender(gender)
+)
+    
+View(d)
+
+##wesanderson 
+
+wesanderson
+
+##list column 
+
+data_frame(
+  movie = names(wesanderson), 
+  colors = wesanderson
+) %>% 
+  arrange(movie)
+
+##but cannot do dplyr operations on a list column
+data_frame(
+  movie = names(wesanderson), 
+  colors = wesanderson
+) %>% 
+  arrange(color)
+
+##instead we can do this 
+
+data_frame(
+  movie = names(wesanderson), 
+  colors = wesanderson
+) %>% 
+  mutate(
+    no_colors = map_int(colors, length)
+  )
+
+##flatten list columns 
+
+data_frame(
+  movie = names(wesanderson), 
+  colors = wesanderson
+) %>% 
+  tidyr::unnest(color = colors) %>% 
+  tidyr::nest(color, .key = "colors") ##or go backwards like this but don't do as.data.frame
+
+
+##Grouping without tidyr
+
+data_frame(
+  movie = names(wesanderson), 
+  colors = wesanderson
+) %>% 
+  tidyr::unnest(color = colors) %>% 
+  group_by(movie) %>% 
+  mutate(
+    colors = list(color)
+  )
+
+ 
+
+```
