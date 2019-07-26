@@ -1,0 +1,3353 @@
+---
+title: "Weeks 5-7"
+author: "Ezinne Nwankwo"
+date: "7/23/2019"
+output: html_document
+---
+
+```{r libraries}
+
+library(dplyr)
+library(purrr)
+library(tidyverse)
+library(ggplot2)
+#install.packages("repurrrsive")
+library(repurrrsive)
+
+```
+
+
+## Exercise 1 
+
+```{r}
+
+movies = readr::read_csv("https://www.stat.duke.edu/~cr173/Sta523_Fa18/slides/data/movies/movies.csv") 
+movies
+
+ggplot(data = movies, aes(x = imdb_num_votes, y = imdb_rating, color = audience_rating)) + 
+  geom_point(alpha = 0.5) + 
+  theme_bw() +
+  facet_wrap(~ mpaa_rating) + 
+  labs(x = "IMDB number of votes", y = "IMDB rating", color = "Audience rating", 
+    title = "IMDB and RT scores, by MPAA rating") 
+
+  
+```
+
+## Exercise 2 
+
+```{r}
+
+ggplot(data = movies, aes(x = audience_score, y = critics_score, color = best_pic_nom)) + 
+  geom_point() + 
+  theme_bw() + 
+  facet_wrap( ~ mpaa_rating) + 
+  geom_smooth(method = "lm", color = "black", se = FALSE, fullrange = TRUE) + 
+  geom_abline(intercept = 0, slope = 1, color = "gray")
+```
+
+
+
+## Homework 3 
+
+```{r}
+
+
+sales = readRDS("lego_sales.rds")
+#View(sales)
+str(sales)
+
+## Creating a dataframe
+
+fix_phone_num <- function(v){
+  
+}
+
+tidy_sales = data_frame(
+  first_name = map_chr(sales, "first_name"),
+  last_name = map_chr(sales, "last_name"),
+  gender = map_chr(sales, "gender"), 
+  age = map_chr(sales, "age") %>% as.integer(), 
+  phone_number = map_chr(sales, "phone_number", .default = NA), 
+  hobbies = map(sales, "hobbies"), 
+  purchases = map(sales, "purchases")
+) %>% 
+  mutate(
+    no_hobbies = map_int(hobbies, length),
+    no_purchases = map_int(purchases, length)
+  ) 
+
+
+
+``` 
+
+1. What are the three most common first names of purchasers?
+```{r}
+
+tidy_sales %>% count(first_name, sort = TRUE) %>% top_n(3, n)
+
+```
+  
+  
+2. What are the five most popular lego sets based on these data?
+
+```{r}
+
+tidy_sales %>% tidyr::unnest(purchases = purchases) 
+
+```
+
+  
+  
+  
+  .. .. ..$ Number  : chr "70595"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Rise of the Villains"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ultra Stealth Raider"
+  .. .. ..$ Pieces  : int 1093
+  .. .. ..$ USPrice : num 120
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70595-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24721
+  .. .. ..$ Number  : chr "10831"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "My First Caterpillar"
+  .. .. ..$ Pieces  : int 19
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10831-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Female"
+  ..$ first_name: chr "Bryanna"
+  ..$ last_name : chr "Welsh"
+  ..$ age       : num 19
+  ..$ hobbies   : chr [1:2] "Animal fancy" "Sand art"
+  ..$ purchases :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24797
+  .. .. ..$ Number  : chr "75138"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Episode V"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Hoth Attack"
+  .. .. ..$ Pieces  : int 233
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75138-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24701
+  .. .. ..$ Number  : chr "76062"
+  .. .. ..$ Theme   : chr "DC Comics Super Heroes"
+  .. .. ..$ Subtheme: chr "Mighty Micros"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Robin vs. Bane"
+  .. .. ..$ Pieces  : int 77
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76062-1.jpg"
+  .. .. ..$ Quantity: num 3
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Caleb"
+  ..$ last_name   : chr "Garcia-Wideman"
+  ..$ age         : num 37
+  ..$ phone_number: chr "907-555-9236"
+  ..$ hobbies     : chr [1:3] "Pet" "Skateboarding" "Jigsaw puzzles"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24730
+  .. .. ..$ Number  : chr "41115"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Emma's Creative Workshop"
+  .. .. ..$ Pieces  : int 108
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41115-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25611
+  .. .. ..$ Number  : chr "21127"
+  .. .. ..$ Theme   : chr "Minecraft"
+  .. .. ..$ Subtheme: chr "Minifig-scale"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Fortress"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 110
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/21127-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Chase"
+  ..$ last_name   : chr "Fortenberry"
+  ..$ age         : num 19
+  ..$ phone_number: chr "205-555-3704"
+  ..$ hobbies     : chr [1:2] "Birdwatching" "Dog sport"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24707
+  .. .. ..$ Number  : chr "10801"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Baby Animals"
+  .. .. ..$ Pieces  : int 13
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10801-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24713
+  .. .. ..$ Number  : chr "10809"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Police Patrol"
+  .. .. ..$ Pieces  : int 15
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10809-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Kevin"
+  ..$ last_name   : chr "Cruz"
+  ..$ age         : num 20
+  ..$ phone_number: chr "947-555-7946"
+  ..$ hobbies     : chr "Gunsmithing"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24767
+  .. .. ..$ Number  : chr "70335"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr "Ultimate"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ultimate Lavaria"
+  .. .. ..$ Pieces  : int 69
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70335-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Connor"
+  ..$ last_name   : chr "Brown"
+  ..$ age         : num 36
+  ..$ phone_number: chr "516-555-4310"
+  ..$ hobbies     : chr "Dance"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24548
+  .. .. ..$ Number  : chr "71230"
+  .. .. ..$ Theme   : chr "Dimensions"
+  .. .. ..$ Subtheme: chr "Fun Pack"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fun Pack: Doc Brown"
+  .. .. ..$ Pieces  : int 69
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71230-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24913
+  .. .. ..$ Number  : chr "60112"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire Engine"
+  .. .. ..$ Pieces  : int 376
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60112-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26034
+  .. .. ..$ Number  : chr "41573"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 9"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Sweepz"
+  .. .. ..$ Pieces  : int 61
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Toni"
+  ..$ last_name   : chr "Borison"
+  ..$ age         : num 40
+  ..$ phone_number: chr "284-555-4560"
+  ..$ hobbies     : chr [1:2] "Singing" "Dowsing"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25626
+  .. .. ..$ Number  : chr "70595"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Rise of the Villains"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ultra Stealth Raider"
+  .. .. ..$ Pieces  : int 1093
+  .. .. ..$ USPrice : num 120
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70595-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24994
+  .. .. ..$ Number  : chr "10251"
+  .. .. ..$ Theme   : chr "Advanced Models"
+  .. .. ..$ Subtheme: chr "Modular Buildings"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Brick Bank"
+  .. .. ..$ Pieces  : int 2380
+  .. .. ..$ USPrice : num 170
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10251-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Daniel"
+  ..$ last_name   : chr "Hurst"
+  ..$ age         : num 44
+  ..$ phone_number: chr "251-555-0845"
+  ..$ hobbies     : chr "Crossword puzzles"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24903
+  .. .. ..$ Number  : chr "41558"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 7"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Mixadel"
+  .. .. ..$ Pieces  : int 63
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41558-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24695
+  .. .. ..$ Number  : chr "31048"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Lakeside Lodge"
+  .. .. ..$ Pieces  : int 368
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31048-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Judith"
+  ..$ last_name   : chr "Webb"
+  ..$ age         : num 39
+  ..$ phone_number: chr "917-555-7417"
+  ..$ hobbies     : chr [1:3] "Beach Volleyball" "Bowling" "Netball"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26058
+  .. .. ..$ Number  : chr "5005059"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Video Games/PS3"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Marvel Avengers PS3 Video Game"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/5005059-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Nicholas"
+  ..$ last_name   : chr "Belfageoua"
+  ..$ age         : num 46
+  ..$ phone_number: chr "606-555-4814"
+  ..$ hobbies     : chr "Bodybuilding"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25881
+  .. .. ..$ Number  : chr "853549"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Key Chains/Friends"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Mia Key Chain"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 5.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853549-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25642
+  .. .. ..$ Number  : chr "70327"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The King's Mech"
+  .. .. ..$ Pieces  : int 375
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70327-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Amanda"
+  ..$ last_name   : chr "Tronnier"
+  ..$ age         : num 45
+  ..$ phone_number: chr "317-555-7477"
+  ..$ hobbies     : chr [1:2] "Topiary" "Baseball"
+  ..$ purchases   :List of 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24959
+  .. .. ..$ Number  : chr "75139"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "The Force Awakens"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Battle on Takodana"
+  .. .. ..$ Pieces  : int 409
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75139-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25887
+  .. .. ..$ Number  : chr "853543"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ninjago Party Set"
+  .. .. ..$ Pieces  : int 70
+  .. .. ..$ USPrice : num 7.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853543-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24685
+  .. .. ..$ Number  : chr "60118"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Traffic"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Garbage Truck"
+  .. .. ..$ Pieces  : int 248
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60118-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25901
+  .. .. ..$ Number  : chr "5004612"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Watches/Clocks"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Lucy Wyldstyle Minifigure Link Watch"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/5004612-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Jacob"
+  ..$ last_name   : chr "Nzabanita"
+  ..$ age         : num 31
+  ..$ phone_number: chr "339-555-2572"
+  ..$ hobbies     : chr "Orienteering"
+  ..$ purchases   :List of 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24732
+  .. .. ..$ Number  : chr "41117"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Pop Star"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Pop Star TV Studio"
+  .. .. ..$ Pieces  : int 194
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41117-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24793
+  .. .. ..$ Number  : chr "75133"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Battlefront"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Rebel Alliance Battle Pack"
+  .. .. ..$ Pieces  : int 101
+  .. .. ..$ USPrice : num 13
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75133-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24723
+  .. .. ..$ Number  : chr "41172"
+  .. .. ..$ Theme   : chr "Elves"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Water Dragon Adventure"
+  .. .. ..$ Pieces  : int 212
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41172-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25920
+  .. .. ..$ Number  : chr "75151"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Episode III"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Clone Turbo Tank"
+  .. .. ..$ Pieces  : int 903
+  .. .. ..$ USPrice : num 110
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75151-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Hannah"
+  ..$ last_name   : chr "Drews Stunkel"
+  ..$ age         : num 55
+  ..$ phone_number: chr "339-555-6320"
+  ..$ hobbies     : chr "Shortwave listening"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25628
+  .. .. ..$ Number  : chr "70590"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Airjitzu Battle Grounds"
+  .. .. ..$ Pieces  : int 666
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25624
+  .. .. ..$ Number  : chr "70593"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Skybound"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Green NRG Dragon"
+  .. .. ..$ Pieces  : int 567
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70593-1.jpg"
+  .. .. ..$ Quantity: num 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24734
+  .. .. ..$ Number  : chr "41119"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Heartlake Cupcake Cafe"
+  .. .. ..$ Pieces  : int 439
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41119-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Male"
+  ..$ first_name: chr "Erik"
+  ..$ last_name : chr "Brownrigg"
+  ..$ age       : num 44
+  ..$ hobbies   : chr [1:2] "Kombucha Brewing" "Martial arts"
+  ..$ purchases :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25621
+  .. .. ..$ Number  : chr "70589"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Rise of the Villains"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Rock Roader"
+  .. .. ..$ Pieces  : int 406
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70589-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Jackson"
+  ..$ last_name   : chr "Martinez"
+  ..$ age         : num 43
+  ..$ phone_number: chr "250-555-1732"
+  ..$ hobbies     : chr "People watching"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24669
+  .. .. ..$ Number  : chr "71304"
+  .. .. ..$ Theme   : chr "Bionicle"
+  .. .. ..$ Subtheme: chr "Companions"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Terak - Creature of Earth"
+  .. .. ..$ Pieces  : int 74
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71304-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24904
+  .. .. ..$ Number  : chr "41559"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 7"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Paladum"
+  .. .. ..$ Pieces  : int 64
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41559-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24665
+  .. .. ..$ Number  : chr "21031"
+  .. .. ..$ Theme   : chr "Architecture"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Burj Khalifa"
+  .. .. ..$ Pieces  : int 333
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/21031-1.jpg"
+  .. .. ..$ Quantity: num 3
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Riley"
+  ..$ last_name   : chr "Ott"
+  ..$ age         : num 51
+  ..$ phone_number: chr "517-555-2093"
+  ..$ hobbies     : chr [1:2] "Quilting" "Driving"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24785
+  .. .. ..$ Number  : chr "75126"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "MicroFighters"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "First Order Snowspeeder"
+  .. .. ..$ Pieces  : int 91
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75126-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24772
+  .. .. ..$ Number  : chr "70604"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Skybound"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Tiger Widow Island"
+  .. .. ..$ Pieces  : int 450
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70604-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Hector"
+  ..$ last_name   : chr "Collins"
+  ..$ age         : num 20
+  ..$ phone_number: chr "340-555-2508"
+  ..$ hobbies     : chr "Kart racing"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24781
+  .. .. ..$ Number  : chr "75116"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Buildable Figures"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Finn"
+  .. .. ..$ Pieces  : int 98
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75116-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24723
+  .. .. ..$ Number  : chr "41172"
+  .. .. ..$ Theme   : chr "Elves"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Water Dragon Adventure"
+  .. .. ..$ Pieces  : int 212
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41172-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24627
+  .. .. ..$ Number  : chr "75098"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Ultimate Collector Series"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Assault on Hoth"
+  .. .. ..$ Pieces  : int 2144
+  .. .. ..$ USPrice : num 250
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75098-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Mckenzie"
+  ..$ last_name   : chr "Cherry"
+  ..$ age         : num 37
+  ..$ phone_number: chr "336-555-9269"
+  ..$ hobbies     : chr [1:3] "Archery" "Calligraphy" "Dancing"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25878
+  .. .. ..$ Number  : chr "853505"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Role-Play toys"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "NK Sword Standard"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853505-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Female"
+  ..$ first_name: chr "Michelle"
+  ..$ last_name : chr "Uguccioni"
+  ..$ age       : num 17
+  ..$ hobbies   : chr [1:3] "Rugby" "Topiary" "Metalworking"
+  ..$ purchases :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24756
+  .. .. ..$ Number  : chr "70310"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Knighton Battle Blaster"
+  .. .. ..$ Pieces  : int 76
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70310-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24896
+  .. .. ..$ Number  : chr "31046"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fast Car"
+  .. .. ..$ Pieces  : int 222
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31046-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Rebecca"
+  ..$ last_name   : chr "Duval"
+  ..$ age         : num 48
+  ..$ phone_number: chr "908-555-4029"
+  ..$ hobbies     : chr [1:2] "Video gaming" "Triathlon"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24899
+  .. .. ..$ Number  : chr "41114"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Party"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Party Styling"
+  .. .. ..$ Pieces  : int 54
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41114-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26034
+  .. .. ..$ Number  : chr "41573"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 9"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Sweepz"
+  .. .. ..$ Pieces  : int 61
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24664
+  .. .. ..$ Number  : chr "21028"
+  .. .. ..$ Theme   : chr "Architecture"
+  .. .. ..$ Subtheme: chr "Skylines"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "New York City"
+  .. .. ..$ Pieces  : int 598
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/21028-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Katherine"
+  ..$ last_name   : chr "Hogue"
+  ..$ age         : num 27
+  ..$ phone_number: chr "289-555-4928"
+  ..$ hobbies     : chr [1:2] "Meteorology" "Roller derby"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25876
+  .. .. ..$ Number  : chr "853555"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Stationery"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Campsite Scrapbook"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853555-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25660
+  .. .. ..$ Number  : chr "75822"
+  .. .. ..$ Theme   : chr "The Angry Birds Movie"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Piggy Plane Attack"
+  .. .. ..$ Pieces  : int 168
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75822-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Adoria"
+  ..$ last_name   : chr "Hammond"
+  ..$ age         : num 40
+  ..$ phone_number: chr "712-555-6781"
+  ..$ hobbies     : chr(0) 
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24720
+  .. .. ..$ Number  : chr "10830"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Minnie's Café"
+  .. .. ..$ Pieces  : int 27
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10830-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Amanda"
+  ..$ last_name   : chr "Musick"
+  ..$ age         : num 24
+  ..$ phone_number: chr "878-555-7113"
+  ..$ hobbies     : chr "Electronics"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25916
+  .. .. ..$ Number  : chr "76054"
+  .. .. ..$ Theme   : chr "DC Comics Super Heroes"
+  .. .. ..$ Subtheme: chr "Batman"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Batman: Scarecrow Harvest of Fear"
+  .. .. ..$ Pieces  : int 563
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76054-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 6
+  ..$ gender    : chr "Female"
+  ..$ first_name: chr "Cecilia"
+  ..$ last_name : chr "Mauro"
+  ..$ age       : num 50
+  ..$ hobbies   : chr [1:2] "Stone skipping" "Kitesurfing"
+  ..$ purchases :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25921
+  .. .. ..$ Number  : chr "75157"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Rebels"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Captain Rex's AT-TE"
+  .. .. ..$ Pieces  : int 972
+  .. .. ..$ USPrice : num 120
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75157-1.jpg"
+  .. .. ..$ Quantity: num 3
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Shina"
+  ..$ last_name   : chr "Hegarty"
+  ..$ age         : num 22
+  ..$ phone_number: chr "868-555-1868"
+  ..$ hobbies     : chr [1:2] "Singing" "Kitesurfing"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24737
+  .. .. ..$ Number  : chr "41135"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Pop Star"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Livi's Pop Star House"
+  .. .. ..$ Pieces  : int 597
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41135-1.jpg"
+  .. .. ..$ Quantity: num 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24706
+  .. .. ..$ Number  : chr "41142"
+  .. .. ..$ Theme   : chr "Disney Princess"
+  .. .. ..$ Subtheme: chr "Palace Pets"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Palace Pets Royal Castle"
+  .. .. ..$ Pieces  : int 186
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41142-1.jpg"
+  .. .. ..$ Quantity: num 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24664
+  .. .. ..$ Number  : chr "21028"
+  .. .. ..$ Theme   : chr "Architecture"
+  .. .. ..$ Subtheme: chr "Skylines"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "New York City"
+  .. .. ..$ Pieces  : int 598
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/21028-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Anthony"
+  ..$ last_name   : chr "Kiyotake"
+  ..$ age         : num 22
+  ..$ phone_number: chr "980-555-0099"
+  ..$ hobbies     : chr "Hunting"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25007
+  .. .. ..$ Number  : chr "41568"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 8"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Lewt"
+  .. .. ..$ Pieces  : int 62
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41568-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25883
+  .. .. ..$ Number  : chr "853568"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Key Chains/City"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Prison Guard Key Chain"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 5.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853568-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Connor"
+  ..$ last_name   : chr "Fourzan"
+  ..$ age         : num 32
+  ..$ phone_number: chr "805-555-3065"
+  ..$ hobbies     : chr [1:2] "Billiards" "Speed skating"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25886
+  .. .. ..$ Number  : chr "853519"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Playmats"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "NK Playmat"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853519-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24789
+  .. .. ..$ Number  : chr "75130"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "MicroFighters"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "AT-DP"
+  .. .. ..$ Pieces  : int 76
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75130-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Kayla"
+  ..$ last_name   : chr "Rush"
+  ..$ age         : num 25
+  ..$ phone_number: chr "281-555-9341"
+  ..$ hobbies     : chr "Gunsmithing"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24896
+  .. .. ..$ Number  : chr "31046"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fast Car"
+  .. .. ..$ Pieces  : int 222
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31046-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24750
+  .. .. ..$ Number  : chr "76065"
+  .. .. ..$ Theme   : chr "Marvel Super Heroes"
+  .. .. ..$ Subtheme: chr "Mighty Micros"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Captain America vs. Red Skull"
+  .. .. ..$ Pieces  : int 95
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76065-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25662
+  .. .. ..$ Number  : chr "75824"
+  .. .. ..$ Theme   : chr "The Angry Birds Movie"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Pig City Teardown"
+  .. .. ..$ Pieces  : int 386
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75824-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Lucas"
+  ..$ last_name   : chr "Montoya"
+  ..$ age         : num 34
+  ..$ phone_number: chr "616-555-2269"
+  ..$ hobbies     : chr [1:3] "Badminton" "Dance" "Soapmaking"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24901
+  .. .. ..$ Number  : chr "41555"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 7"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Busto"
+  .. .. ..$ Pieces  : int 69
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41555-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24899
+  .. .. ..$ Number  : chr "41114"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Party"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Party Styling"
+  .. .. ..$ Pieces  : int 54
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41114-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24762
+  .. .. ..$ Number  : chr "70330"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr "Ultimate"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ultimate Clay"
+  .. .. ..$ Pieces  : int 72
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70330-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Peggy"
+  ..$ last_name   : chr "Hiner"
+  ..$ age         : num 21
+  ..$ phone_number: chr "563-555-1011"
+  ..$ hobbies     : chr [1:2] "Flying" "Speed skating"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24734
+  .. .. ..$ Number  : chr "41119"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Heartlake Cupcake Cafe"
+  .. .. ..$ Pieces  : int 439
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41119-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Female"
+  ..$ first_name: chr "Maya"
+  ..$ last_name : chr "Wolfe"
+  ..$ age       : num 33
+  ..$ hobbies   : chr [1:2] "Acting" "Rock balancing"
+  ..$ purchases :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25881
+  .. .. ..$ Number  : chr "853549"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Key Chains/Friends"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Mia Key Chain"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 5.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853549-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Keno"
+  ..$ last_name   : chr "Graves"
+  ..$ age         : num 51
+  ..$ phone_number: chr "209-555-6030"
+  ..$ hobbies     : chr [1:2] "Marbles" "Animal fancy"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25898
+  .. .. ..$ Number  : chr "75145"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Original Content"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Eclipse Fighter"
+  .. .. ..$ Pieces  : int 363
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75145-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Lucas"
+  ..$ last_name   : chr "Jimenez-Dominguez"
+  ..$ age         : num 18
+  ..$ phone_number: chr "712-555-0459"
+  ..$ hobbies     : chr [1:3] "Hiking" "Mushroom hunting/Mycology" "Metalworking"
+  ..$ purchases   :List of 5
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24691
+  .. .. ..$ Number  : chr "31043"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Chopper Transporter"
+  .. .. ..$ Pieces  : int 124
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31043-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26034
+  .. .. ..$ Number  : chr "41573"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 9"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Sweepz"
+  .. .. ..$ Pieces  : int 61
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24704
+  .. .. ..$ Number  : chr "41140"
+  .. .. ..$ Theme   : chr "Disney Princess"
+  .. .. ..$ Subtheme: chr "Palace Pets"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Daisy's Beauty Salon"
+  .. .. ..$ Pieces  : int 98
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41140-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24903
+  .. .. ..$ Number  : chr "41558"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 7"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Mixadel"
+  .. .. ..$ Pieces  : int 63
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41558-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26033
+  .. .. ..$ Number  : chr "41572"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 9"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Gobbol"
+  .. .. ..$ Pieces  : int 62
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Jake"
+  ..$ last_name   : chr "Montes Alvarez"
+  ..$ age         : num 30
+  ..$ phone_number: chr "603-555-6881"
+  ..$ hobbies     : chr [1:2] "Fishing" "Mahjong"
+  ..$ purchases   :List of 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25005
+  .. .. ..$ Number  : chr "41566"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 8"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Sharx"
+  .. .. ..$ Pieces  : int 55
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41566-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24751
+  .. .. ..$ Number  : chr "76066"
+  .. .. ..$ Theme   : chr "Marvel Super Heroes"
+  .. .. ..$ Subtheme: chr "Mighty Micros"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Hulk vs. Ultron"
+  .. .. ..$ Pieces  : int 80
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76066-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24704
+  .. .. ..$ Number  : chr "41140"
+  .. .. ..$ Theme   : chr "Disney Princess"
+  .. .. ..$ Subtheme: chr "Palace Pets"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Daisy's Beauty Salon"
+  .. .. ..$ Pieces  : int 98
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41140-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25901
+  .. .. ..$ Number  : chr "5004612"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Watches/Clocks"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Lucy Wyldstyle Minifigure Link Watch"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/5004612-1.jpg"
+  .. .. ..$ Quantity: num 3
+ $ :List of 6
+  ..$ gender    : chr "Male"
+  ..$ first_name: chr "Trevon"
+  ..$ last_name : chr "Thanh"
+  ..$ age       : num 25
+  ..$ hobbies   : chr "Ice hockey"
+  ..$ purchases :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25612
+  .. .. ..$ Number  : chr "21128"
+  .. .. ..$ Theme   : chr "Minecraft"
+  .. .. ..$ Subtheme: chr "Minifig-scale"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Village"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 200
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "John'Dunae"
+  ..$ last_name   : chr "Higgins"
+  ..$ age         : num 19
+  ..$ phone_number: chr "813-555-5561"
+  ..$ hobbies     : chr [1:2] "Golfing" "Sand art"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24744
+  .. .. ..$ Number  : chr "76046"
+  .. .. ..$ Theme   : chr "DC Comics Super Heroes"
+  .. .. ..$ Subtheme: chr "Batman v Superman: Dawn of Justice"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Heroes of Justice: Sky High Battle"
+  .. .. ..$ Pieces  : int 517
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76046-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Male"
+  ..$ first_name: chr "Tysen"
+  ..$ last_name : chr "Banda-Chavez"
+  ..$ age       : num 43
+  ..$ hobbies   : chr "Hunting"
+  ..$ purchases :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26059
+  .. .. ..$ Number  : chr "5005060"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Video Games/3DS"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Marvel Avengers Nintendo 3DS Video Game"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/5005060-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25003
+  .. .. ..$ Number  : chr "41564"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 8"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Aquad"
+  .. .. ..$ Pieces  : int 70
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41564-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24677
+  .. .. ..$ Number  : chr "60108"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire Response Unit"
+  .. .. ..$ Pieces  : int 257
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60108-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Janay"
+  ..$ last_name   : chr "Gienapp"
+  ..$ age         : num 63
+  ..$ phone_number: chr "774-555-2102"
+  ..$ hobbies     : chr "Paintball"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25612
+  .. .. ..$ Number  : chr "21128"
+  .. .. ..$ Theme   : chr "Minecraft"
+  .. .. ..$ Subtheme: chr "Minifig-scale"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Village"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 200
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24704
+  .. .. ..$ Number  : chr "41140"
+  .. .. ..$ Theme   : chr "Disney Princess"
+  .. .. ..$ Subtheme: chr "Palace Pets"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Daisy's Beauty Salon"
+  .. .. ..$ Pieces  : int 98
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41140-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25893
+  .. .. ..$ Number  : chr "30349"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Sports Car"
+  .. .. ..$ Pieces  : int 47
+  .. .. ..$ USPrice : num 3.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/30349-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Eric"
+  ..$ last_name   : chr "Benally"
+  ..$ age         : num 20
+  ..$ phone_number: chr "418-555-3696"
+  ..$ hobbies     : chr "Archery"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24761
+  .. .. ..$ Number  : chr "70316"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Jestro's Evil Mobile"
+  .. .. ..$ Pieces  : int 658
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70316-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25634
+  .. .. ..$ Number  : chr "70319"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Macy's Thunder Mace"
+  .. .. ..$ Pieces  : int 202
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70319-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24900
+  .. .. ..$ Number  : chr "41122"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Adventure Camp"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Adventure Camp Tree House"
+  .. .. ..$ Pieces  : int 726
+  .. .. ..$ USPrice : num 80
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41122-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Male"
+  ..$ first_name: chr "Carson"
+  ..$ last_name : chr "Aragon"
+  ..$ age       : num 38
+  ..$ hobbies   : chr [1:2] "Letterboxing" "Judo"
+  ..$ purchases :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25634
+  .. .. ..$ Number  : chr "70319"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Macy's Thunder Mace"
+  .. .. ..$ Pieces  : int 202
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70319-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25910
+  .. .. ..$ Number  : chr "30347"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire Car"
+  .. .. ..$ Pieces  : int 53
+  .. .. ..$ USPrice : num 3.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/30347-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Samantha"
+  ..$ last_name   : chr "Haberland"
+  ..$ age         : num 21
+  ..$ phone_number: chr "705-555-1457"
+  ..$ hobbies     : chr "Gunsmithing"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25668
+  .. .. ..$ Number  : chr "75828"
+  .. .. ..$ Theme   : chr "Ghostbusters"
+  .. .. ..$ Subtheme: chr "Reboot"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ghostbusters Ecto-1 & Ecto-2"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75828-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25644
+  .. .. ..$ Number  : chr "71313"
+  .. .. ..$ Theme   : chr "Bionicle"
+  .. .. ..$ Subtheme: chr "Reboot Villains"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Lava Beast"
+  .. .. ..$ Pieces  : int 114
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24764
+  .. .. ..$ Number  : chr "70333"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr "Ultimate"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ultimate Robin"
+  .. .. ..$ Pieces  : int 75
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70333-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Cameron"
+  ..$ last_name   : chr "Rodriguez"
+  ..$ age         : num 48
+  ..$ phone_number: chr "325-555-1926"
+  ..$ hobbies     : chr [1:2] "Table tennis" "Kayaking"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25879
+  .. .. ..$ Number  : chr "853534"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Key Chains/Ninjago"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Airjitzu Jay Key Chain"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 5.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853534-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25910
+  .. .. ..$ Number  : chr "30347"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire Car"
+  .. .. ..$ Pieces  : int 53
+  .. .. ..$ USPrice : num 3.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/30347-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Connor"
+  ..$ last_name   : chr "Padilla"
+  ..$ age         : num 36
+  ..$ phone_number: chr "441-555-6534"
+  ..$ hobbies     : chr [1:3] "Coin collecting" "Knife making" "Video game collecting"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24674
+  .. .. ..$ Number  : chr "71310"
+  .. .. ..$ Theme   : chr "Bionicle"
+  .. .. ..$ Subtheme: chr "Reboot Villains"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Umarak the Hunter"
+  .. .. ..$ Pieces  : int 172
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71310-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24902
+  .. .. ..$ Number  : chr "41556"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 7"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Tiketz"
+  .. .. ..$ Pieces  : int 62
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41556-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24797
+  .. .. ..$ Number  : chr "75138"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Episode V"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Hoth Attack"
+  .. .. ..$ Pieces  : int 233
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75138-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Tyrii"
+  ..$ last_name   : chr "Bloom"
+  ..$ age         : num 23
+  ..$ phone_number: chr "784-555-7128"
+  ..$ hobbies     : chr [1:2] "Rugby" "Astrology"
+  ..$ purchases   :List of 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24759
+  .. .. ..$ Number  : chr "70313"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Moltor's Lava Smasher"
+  .. .. ..$ Pieces  : int 187
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70313-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24735
+  .. .. ..$ Number  : chr "41120"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Adventure Camp"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Adventure Camp Archery"
+  .. .. ..$ Pieces  : int 114
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41120-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24692
+  .. .. ..$ Number  : chr "31044"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Park Animals"
+  .. .. ..$ Pieces  : int 202
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31044-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24737
+  .. .. ..$ Number  : chr "41135"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Pop Star"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Livi's Pop Star House"
+  .. .. ..$ Pieces  : int 597
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41135-1.jpg"
+  .. .. ..$ Quantity: num 3
+ $ :List of 6
+  ..$ gender    : chr "Male"
+  ..$ first_name: chr "Austin"
+  ..$ last_name : chr "Martinez"
+  ..$ age       : num 29
+  ..$ hobbies   : chr [1:2] "Electronics" "Seashell collecting"
+  ..$ purchases :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24769
+  .. .. ..$ Number  : chr "70600"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Skybound"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ninja Bike Chase"
+  .. .. ..$ Pieces  : int 231
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70600-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Caroline"
+  ..$ last_name   : chr "Holstein"
+  ..$ age         : num 38
+  ..$ phone_number: chr "318-555-7894"
+  ..$ hobbies     : chr [1:2] "Darts" "Knitting"
+  ..$ purchases   :List of 5
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24798
+  .. .. ..$ Number  : chr "75140"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "The Force Awakens"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Resistance Troop Transporter"
+  .. .. ..$ Pieces  : int 646
+  .. .. ..$ USPrice : num 70
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75140-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24763
+  .. .. ..$ Number  : chr "70331"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr "Ultimate"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ultimate Macy"
+  .. .. ..$ Pieces  : int 101
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70331-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24678
+  .. .. ..$ Number  : chr "60109"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire Boat"
+  .. .. ..$ Pieces  : int 412
+  .. .. ..$ USPrice : num 80
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60109-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24959
+  .. .. ..$ Number  : chr "75139"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "The Force Awakens"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Battle on Takodana"
+  .. .. ..$ Pieces  : int 409
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75139-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24699
+  .. .. ..$ Number  : chr "76053"
+  .. .. ..$ Theme   : chr "DC Comics Super Heroes"
+  .. .. ..$ Subtheme: chr "Batman"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Gotham City Cycle Chase"
+  .. .. ..$ Pieces  : int 224
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76053-1.jpg"
+  .. .. ..$ Quantity: num 3
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Joshua"
+  ..$ last_name   : chr "Long"
+  ..$ age         : num 55
+  ..$ phone_number: chr "469-555-6245"
+  ..$ hobbies     : chr [1:2] "Animal fancy" "Cryptography"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26056
+  .. .. ..$ Number  : chr "5005057"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Video Games/XBOX 360"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Marvel Avengers XBOX 360 Video Game"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/5005057-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26057
+  .. .. ..$ Number  : chr "5005058"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Video Games/Wii U"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Marvel Avengers Wii U Video Game"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/5005058-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Male"
+  ..$ first_name: chr "Binh"
+  ..$ last_name : chr "Skalla"
+  ..$ age       : num 23
+  ..$ hobbies   : chr "Auto audiophilia"
+  ..$ purchases :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24685
+  .. .. ..$ Number  : chr "60118"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Traffic"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Garbage Truck"
+  .. .. ..$ Pieces  : int 248
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60118-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24781
+  .. .. ..$ Number  : chr "75116"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Buildable Figures"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Finn"
+  .. .. ..$ Pieces  : int 98
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75116-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24736
+  .. .. ..$ Number  : chr "41121"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Adventure Camp"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Adventure Camp Rafting"
+  .. .. ..$ Pieces  : int 320
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41121-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Nicholas"
+  ..$ last_name   : chr "Scott"
+  ..$ age         : num 57
+  ..$ phone_number: chr "418-555-1075"
+  ..$ hobbies     : chr "Climbing"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24758
+  .. .. ..$ Number  : chr "70312"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Lance's Mecha Horse"
+  .. .. ..$ Pieces  : int 237
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70312-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25881
+  .. .. ..$ Number  : chr "853549"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Key Chains/Friends"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Mia Key Chain"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 5.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853549-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25885
+  .. .. ..$ Number  : chr "853572"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Key Chains/Miscellaneous"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Bumble Bee Key Chain"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 5.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853572-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Jacob"
+  ..$ last_name   : chr "Barron"
+  ..$ age         : num 27
+  ..$ phone_number: chr "319-555-6104"
+  ..$ hobbies     : chr "Animal fancy"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24680
+  .. .. ..$ Number  : chr "60113"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Traffic"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Rally Car"
+  .. .. ..$ Pieces  : int 104
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60113-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24792
+  .. .. ..$ Number  : chr "75134"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Battlefront"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Galactic Empire Battle Pack"
+  .. .. ..$ Pieces  : int 109
+  .. .. ..$ USPrice : num 13
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75134-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Madeline"
+  ..$ last_name   : chr "Castor"
+  ..$ age         : num 39
+  ..$ phone_number: chr "450-555-9877"
+  ..$ hobbies     : chr [1:2] "Kitesurfing" "Baseball"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25006
+  .. .. ..$ Number  : chr "41567"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 8"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Skulzy"
+  .. .. ..$ Pieces  : int 66
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41567-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25969
+  .. .. ..$ Number  : chr "76059"
+  .. .. ..$ Theme   : chr "Marvel Super Heroes"
+  .. .. ..$ Subtheme: chr "Ultimate Spider-Man"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Spider-Man: Doc Ock's Tentacle Trap"
+  .. .. ..$ Pieces  : int 446
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76059-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26025
+  .. .. ..$ Number  : chr "41178"
+  .. .. ..$ Theme   : chr "Elves"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Dragon Sanctuary"
+  .. .. ..$ Pieces  : int 585
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Trevor"
+  ..$ last_name   : chr "Perez"
+  ..$ age         : num 39
+  ..$ phone_number: chr "878-555-5155"
+  ..$ hobbies     : chr "Deltiology (postcard collecting)"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24730
+  .. .. ..$ Number  : chr "41115"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Emma's Creative Workshop"
+  .. .. ..$ Pieces  : int 108
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41115-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24746
+  .. .. ..$ Number  : chr "76048"
+  .. .. ..$ Theme   : chr "Marvel Super Heroes"
+  .. .. ..$ Subtheme: chr "Avengers Assemble"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Iron Skull Sub Attack"
+  .. .. ..$ Pieces  : int 335
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76048-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24703
+  .. .. ..$ Number  : chr "41069"
+  .. .. ..$ Theme   : chr "Disney Princess"
+  .. .. ..$ Subtheme: chr "Palace Pets"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Treasure's Day at the Pool"
+  .. .. ..$ Pieces  : int 70
+  .. .. ..$ USPrice : num 5.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41069-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "David"
+  ..$ last_name   : chr "Cabral"
+  ..$ age         : num 19
+  ..$ phone_number: chr "415-555-8642"
+  ..$ hobbies     : chr "Insect collecting"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24957
+  .. .. ..$ Number  : chr "71309"
+  .. .. ..$ Theme   : chr "Bionicle"
+  .. .. ..$ Subtheme: chr "Toa"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Onua - Uniter of Earth"
+  .. .. ..$ Pieces  : int 143
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71309-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Adam"
+  ..$ last_name   : chr "Albornoz"
+  ..$ age         : num 36
+  ..$ phone_number: chr "418-555-2486"
+  ..$ hobbies     : chr [1:2] "Sewing" "Hunting"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24907
+  .. .. ..$ Number  : chr "42050"
+  .. .. ..$ Theme   : chr "Technic"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Drag Racer"
+  .. .. ..$ Pieces  : int 647
+  .. .. ..$ USPrice : num 80
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/42050-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Manuel"
+  ..$ last_name   : chr "Wilkerson"
+  ..$ age         : num 23
+  ..$ phone_number: chr "441-555-3652"
+  ..$ hobbies     : chr [1:3] "Radio-controlled car racing" "Handball" "Sculling or Rowing"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24725
+  .. .. ..$ Number  : chr "41174"
+  .. .. ..$ Theme   : chr "Elves"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Starlight Inn"
+  .. .. ..$ Pieces  : int 343
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41174-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24751
+  .. .. ..$ Number  : chr "76066"
+  .. .. ..$ Theme   : chr "Marvel Super Heroes"
+  .. .. ..$ Subtheme: chr "Mighty Micros"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Hulk vs. Ultron"
+  .. .. ..$ Pieces  : int 80
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76066-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24768
+  .. .. ..$ Number  : chr "70599"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Skybound"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Cole's Dragon"
+  .. .. ..$ Pieces  : int 98
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70599-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Dakota"
+  ..$ last_name   : chr "Klopp"
+  ..$ age         : num 33
+  ..$ phone_number: chr "970-555-9320"
+  ..$ hobbies     : chr [1:2] "Art collecting" "Cycling"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25660
+  .. .. ..$ Number  : chr "75822"
+  .. .. ..$ Theme   : chr "The Angry Birds Movie"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Piggy Plane Attack"
+  .. .. ..$ Pieces  : int 168
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75822-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24807
+  .. .. ..$ Number  : chr "71235"
+  .. .. ..$ Theme   : chr "Dimensions"
+  .. .. ..$ Subtheme: chr "Level Pack"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Level Pack: Midway Arcade"
+  .. .. ..$ Pieces  : int 96
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71235-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25006
+  .. .. ..$ Number  : chr "41567"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 8"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Skulzy"
+  .. .. ..$ Pieces  : int 66
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41567-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Aleksandr"
+  ..$ last_name   : chr "Gurrola"
+  ..$ age         : num 61
+  ..$ phone_number: chr "508-555-9403"
+  ..$ hobbies     : chr(0) 
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25910
+  .. .. ..$ Number  : chr "30347"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire Car"
+  .. .. ..$ Pieces  : int 53
+  .. .. ..$ USPrice : num 3.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/30347-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Male"
+  ..$ first_name: chr "Michael"
+  ..$ last_name : chr "Hernandez Muniz"
+  ..$ age       : num 62
+  ..$ hobbies   : chr [1:2] "Jewelry making" "Kitesurfing"
+  ..$ purchases :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24745
+  .. .. ..$ Number  : chr "76047"
+  .. .. ..$ Theme   : chr "Marvel Super Heroes"
+  .. .. ..$ Subtheme: chr "Captain America: Civil War"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Black Panther Pursuit"
+  .. .. ..$ Pieces  : int 287
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76047-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Xavier"
+  ..$ last_name   : chr "Suazo"
+  ..$ age         : num 27
+  ..$ phone_number: chr "321-555-0605"
+  ..$ hobbies     : chr [1:2] "Mineral collecting" "Creative writing"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24779
+  .. .. ..$ Number  : chr "75114"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Buildable Figures"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "First Order Stormtrooper"
+  .. .. ..$ Pieces  : int 81
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75114-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24771
+  .. .. ..$ Number  : chr "70603"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Skybound"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Raid Zeppelin"
+  .. .. ..$ Pieces  : int 294
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70603-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Jaime"
+  ..$ last_name   : chr "Rideout"
+  ..$ age         : num 26
+  ..$ phone_number: chr "913-555-5139"
+  ..$ hobbies     : chr [1:2] "Vacation" "Cricket"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25641
+  .. .. ..$ Number  : chr "70326"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Black Knight Mech"
+  .. .. ..$ Pieces  : int 530
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24717
+  .. .. ..$ Number  : chr "10818"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "My First Truck"
+  .. .. ..$ Pieces  : int 29
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10818-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24899
+  .. .. ..$ Number  : chr "41114"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Party"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Party Styling"
+  .. .. ..$ Pieces  : int 54
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41114-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Tj"
+  ..$ last_name   : chr "Aguon"
+  ..$ age         : num 47
+  ..$ phone_number: chr "862-555-5629"
+  ..$ hobbies     : chr "Graffiti"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24737
+  .. .. ..$ Number  : chr "41135"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Pop Star"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Livi's Pop Star House"
+  .. .. ..$ Pieces  : int 597
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41135-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24894
+  .. .. ..$ Number  : chr "31040"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Desert Racers"
+  .. .. ..$ Pieces  : int 65
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31040-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24720
+  .. .. ..$ Number  : chr "10830"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Minnie's Café"
+  .. .. ..$ Pieces  : int 27
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10830-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Taylor"
+  ..$ last_name   : chr "Allen"
+  ..$ age         : num 41
+  ..$ phone_number: chr "760-555-8123"
+  ..$ hobbies     : chr [1:2] "Fashion" "Ice skating"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25923
+  .. .. ..$ Number  : chr "75147"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Original Content"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Star Scavenger"
+  .. .. ..$ Pieces  : int 558
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75147-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Kaitlyn"
+  ..$ last_name   : chr "Degeer"
+  ..$ age         : num 24
+  ..$ phone_number: chr "316-555-7890"
+  ..$ hobbies     : chr [1:3] "Wood carving" "Fencing" "Fishing"
+  ..$ purchases   :List of 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25887
+  .. .. ..$ Number  : chr "853543"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ninjago Party Set"
+  .. .. ..$ Pieces  : int 70
+  .. .. ..$ USPrice : num 7.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853543-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24765
+  .. .. ..$ Number  : chr "70332"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr "Ultimate"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ultimate Aaron"
+  .. .. ..$ Pieces  : int 82
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70332-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26035
+  .. .. ..$ Number  : chr "41574"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 9"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Compax"
+  .. .. ..$ Pieces  : int 66
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24994
+  .. .. ..$ Number  : chr "10251"
+  .. .. ..$ Theme   : chr "Advanced Models"
+  .. .. ..$ Subtheme: chr "Modular Buildings"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Brick Bank"
+  .. .. ..$ Pieces  : int 2380
+  .. .. ..$ USPrice : num 170
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10251-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Matthew"
+  ..$ last_name   : chr "Sandoval"
+  ..$ age         : num 22
+  ..$ phone_number: chr "671-555-7044"
+  ..$ hobbies     : chr [1:3] "Knife throwing" "Skateboarding" "Amateur radio"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25660
+  .. .. ..$ Number  : chr "75822"
+  .. .. ..$ Theme   : chr "The Angry Birds Movie"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Piggy Plane Attack"
+  .. .. ..$ Pieces  : int 168
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75822-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25884
+  .. .. ..$ Number  : chr "853571"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Key Chains/Miscellaneous"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Hot Dog Guy Key Chain"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 5.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853571-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Jordan"
+  ..$ last_name   : chr "West"
+  ..$ age         : num 56
+  ..$ phone_number: chr "810-555-1608"
+  ..$ hobbies     : chr [1:2] "Shooting sport" "Table tennis"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24898
+  .. .. ..$ Number  : chr "41113"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Party"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Party Gift Shop"
+  .. .. ..$ Pieces  : int 52
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41113-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24711
+  .. .. ..$ Number  : chr "10807"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Horse Trailer"
+  .. .. ..$ Pieces  : int 15
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10807-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Reyes"
+  ..$ last_name   : chr "Wilson"
+  ..$ age         : num 33
+  ..$ phone_number: chr "605-555-2774"
+  ..$ hobbies     : chr "Seashell collecting"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24903
+  .. .. ..$ Number  : chr "41558"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 7"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Mixadel"
+  .. .. ..$ Pieces  : int 63
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41558-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24693
+  .. .. ..$ Number  : chr "31045"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ocean Explorer"
+  .. .. ..$ Pieces  : int 213
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31045-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24793
+  .. .. ..$ Number  : chr "75133"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Battlefront"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Rebel Alliance Battle Pack"
+  .. .. ..$ Pieces  : int 101
+  .. .. ..$ USPrice : num 13
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75133-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Avery"
+  ..$ last_name   : chr "Leung"
+  ..$ age         : num 33
+  ..$ phone_number: chr "330-555-2699"
+  ..$ hobbies     : chr [1:2] "Scuba diving" "Sketching"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24781
+  .. .. ..$ Number  : chr "75116"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Buildable Figures"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Finn"
+  .. .. ..$ Pieces  : int 98
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75116-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25876
+  .. .. ..$ Number  : chr "853555"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Stationery"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Campsite Scrapbook"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853555-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Michael"
+  ..$ last_name   : chr "Williams"
+  ..$ age         : num 31
+  ..$ phone_number: chr "936-555-2974"
+  ..$ hobbies     : chr(0) 
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24988
+  .. .. ..$ Number  : chr "40202"
+  .. .. ..$ Theme   : chr "Seasonal"
+  .. .. ..$ Subtheme: chr "Easter"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Easter Chick"
+  .. .. ..$ Pieces  : int 111
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24672
+  .. .. ..$ Number  : chr "71307"
+  .. .. ..$ Theme   : chr "Bionicle"
+  .. .. ..$ Subtheme: chr "Toa"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Gali - Uniter of Water"
+  .. .. ..$ Pieces  : int 87
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71307-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24895
+  .. .. ..$ Number  : chr "31041"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Construction Vehicles"
+  .. .. ..$ Pieces  : int 64
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31041-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Colleen"
+  ..$ last_name   : chr "Galley"
+  ..$ age         : num 31
+  ..$ phone_number: chr "710-555-8843"
+  ..$ hobbies     : chr "Field hockey"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24705
+  .. .. ..$ Number  : chr "41141"
+  .. .. ..$ Theme   : chr "Disney Princess"
+  .. .. ..$ Subtheme: chr "Palace Pets"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Pumpkin's Royal Carriage"
+  .. .. ..$ Pieces  : int 79
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41141-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24976
+  .. .. ..$ Number  : chr "60105"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire ATV"
+  .. .. ..$ Pieces  : int 64
+  .. .. ..$ USPrice : num 6.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60105-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24956
+  .. .. ..$ Number  : chr "71300"
+  .. .. ..$ Theme   : chr "Bionicle"
+  .. .. ..$ Subtheme: chr "companions"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Uxar - Creature of Jungle"
+  .. .. ..$ Pieces  : int 89
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71300-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Brandilyn"
+  ..$ last_name   : chr "Robertson"
+  ..$ age         : num 27
+  ..$ phone_number: chr "724-555-5496"
+  ..$ hobbies     : chr(0) 
+  ..$ purchases   :List of 5
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24703
+  .. .. ..$ Number  : chr "41069"
+  .. .. ..$ Theme   : chr "Disney Princess"
+  .. .. ..$ Subtheme: chr "Palace Pets"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Treasure's Day at the Pool"
+  .. .. ..$ Pieces  : int 70
+  .. .. ..$ USPrice : num 5.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41069-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25886
+  .. .. ..$ Number  : chr "853519"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Playmats"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "NK Playmat"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853519-1.jpg"
+  .. .. ..$ Quantity: num 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24704
+  .. .. ..$ Number  : chr "41140"
+  .. .. ..$ Theme   : chr "Disney Princess"
+  .. .. ..$ Subtheme: chr "Palace Pets"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Daisy's Beauty Salon"
+  .. .. ..$ Pieces  : int 98
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41140-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25635
+  .. .. ..$ Number  : chr "70320"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Aaron Fox's Aero-Striker V2"
+  .. .. ..$ Pieces  : int 301
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70320-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24745
+  .. .. ..$ Number  : chr "76047"
+  .. .. ..$ Theme   : chr "Marvel Super Heroes"
+  .. .. ..$ Subtheme: chr "Captain America: Civil War"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Black Panther Pursuit"
+  .. .. ..$ Pieces  : int 287
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76047-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Son"
+  ..$ last_name   : chr "Saldanha"
+  ..$ age         : num 30
+  ..$ phone_number: chr "507-555-2278"
+  ..$ hobbies     : chr(0) 
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25878
+  .. .. ..$ Number  : chr "853505"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Role-Play toys"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "NK Sword Standard"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/853505-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24793
+  .. .. ..$ Number  : chr "75133"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Battlefront"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Rebel Alliance Battle Pack"
+  .. .. ..$ Pieces  : int 101
+  .. .. ..$ USPrice : num 13
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75133-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Katherine"
+  ..$ last_name   : chr "Beck"
+  ..$ age         : num 45
+  ..$ phone_number: chr "209-555-7105"
+  ..$ hobbies     : chr [1:2] "Rugby league football" "Scuba diving"
+  ..$ purchases   :List of 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24994
+  .. .. ..$ Number  : chr "10251"
+  .. .. ..$ Theme   : chr "Advanced Models"
+  .. .. ..$ Subtheme: chr "Modular Buildings"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Brick Bank"
+  .. .. ..$ Pieces  : int 2380
+  .. .. ..$ USPrice : num 170
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10251-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24959
+  .. .. ..$ Number  : chr "75139"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "The Force Awakens"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Battle on Takodana"
+  .. .. ..$ Pieces  : int 409
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75139-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24758
+  .. .. ..$ Number  : chr "70312"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Lance's Mecha Horse"
+  .. .. ..$ Pieces  : int 237
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70312-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26025
+  .. .. ..$ Number  : chr "41178"
+  .. .. ..$ Theme   : chr "Elves"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Dragon Sanctuary"
+  .. .. ..$ Pieces  : int 585
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Beemnet"
+  ..$ last_name   : chr "Masters"
+  ..$ age         : num 41
+  ..$ phone_number: chr "902-555-8429"
+  ..$ hobbies     : chr [1:2] "Astrology" "Sculling or Rowing"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24678
+  .. .. ..$ Number  : chr "60109"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire Boat"
+  .. .. ..$ Pieces  : int 412
+  .. .. ..$ USPrice : num 80
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60109-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24794
+  .. .. ..$ Number  : chr "75135"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Episode III"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Obi-Wan's Jedi Interceptor"
+  .. .. ..$ Pieces  : int 215
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75135-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Shylynn"
+  ..$ last_name   : chr "Seitz"
+  ..$ age         : num 28
+  ..$ phone_number: chr "205-555-7084"
+  ..$ hobbies     : chr "Kombucha Brewing"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24756
+  .. .. ..$ Number  : chr "70310"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Knighton Battle Blaster"
+  .. .. ..$ Pieces  : int 76
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70310-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24679
+  .. .. ..$ Number  : chr "60111"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire Utility Truck"
+  .. .. ..$ Pieces  : int 368
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60111-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Sonny"
+  ..$ last_name   : chr "Smith"
+  ..$ age         : num 24
+  ..$ phone_number: chr "246-555-7913"
+  ..$ hobbies     : chr [1:2] "Web surfing" "Kitesurfing"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24699
+  .. .. ..$ Number  : chr "76053"
+  .. .. ..$ Theme   : chr "DC Comics Super Heroes"
+  .. .. ..$ Subtheme: chr "Batman"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Gotham City Cycle Chase"
+  .. .. ..$ Pieces  : int 224
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76053-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Joshua"
+  ..$ last_name   : chr "Reyes"
+  ..$ age         : num 53
+  ..$ phone_number: chr "251-555-5985"
+  ..$ hobbies     : chr [1:2] "Antiquities" "Urban exploration"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25605
+  .. .. ..$ Number  : chr "75146"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Seasonal"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Star Wars Advent Calendar"
+  .. .. ..$ Pieces  : int 282
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75146-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24780
+  .. .. ..$ Number  : chr "75115"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Buildable Figures"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Poe Dameron"
+  .. .. ..$ Pieces  : int 102
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75115-1.jpg"
+  .. .. ..$ Quantity: num 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24618
+  .. .. ..$ Number  : chr "71238"
+  .. .. ..$ Theme   : chr "Dimensions"
+  .. .. ..$ Subtheme: chr "Fun Pack"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fun Pack: Cyberman"
+  .. .. ..$ Pieces  : int 40
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71238-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Asia"
+  ..$ last_name   : chr "Salyer"
+  ..$ age         : num 24
+  ..$ phone_number: chr "508-555-0418"
+  ..$ hobbies     : chr [1:2] "Darts" "Sculling or Rowing"
+  ..$ purchases   :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24751
+  .. .. ..$ Number  : chr "76066"
+  .. .. ..$ Theme   : chr "Marvel Super Heroes"
+  .. .. ..$ Subtheme: chr "Mighty Micros"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Hulk vs. Ultron"
+  .. .. ..$ Pieces  : int 80
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76066-1.jpg"
+  .. .. ..$ Quantity: num 3
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Neil"
+  ..$ last_name   : chr "Gabel"
+  ..$ age         : num 30
+  ..$ phone_number: chr "508-555-5700"
+  ..$ hobbies     : chr [1:2] "Hiking/backpacking" "Poi"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26056
+  .. .. ..$ Number  : chr "5005057"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Video Games/XBOX 360"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Marvel Avengers XBOX 360 Video Game"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/5005057-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26058
+  .. .. ..$ Number  : chr "5005059"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Video Games/PS3"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Marvel Avengers PS3 Video Game"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/5005059-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24672
+  .. .. ..$ Number  : chr "71307"
+  .. .. ..$ Theme   : chr "Bionicle"
+  .. .. ..$ Subtheme: chr "Toa"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Gali - Uniter of Water"
+  .. .. ..$ Pieces  : int 87
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71307-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Chayanne"
+  ..$ last_name   : chr "Williams"
+  ..$ age         : num 17
+  ..$ phone_number: chr "869-555-6681"
+  ..$ hobbies     : chr(0) 
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24678
+  .. .. ..$ Number  : chr "60109"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Fire"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fire Boat"
+  .. .. ..$ Pieces  : int 412
+  .. .. ..$ USPrice : num 80
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60109-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24697
+  .. .. ..$ Number  : chr "76044"
+  .. .. ..$ Theme   : chr "DC Comics Super Heroes"
+  .. .. ..$ Subtheme: chr "Batman v Superman: Dawn of Justice"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Clash of the Heroes"
+  .. .. ..$ Pieces  : int 92
+  .. .. ..$ USPrice : num 13
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/76044-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Demetri"
+  ..$ last_name   : chr "Do"
+  ..$ age         : num 21
+  ..$ phone_number: chr "541-555-1433"
+  ..$ hobbies     : chr "People watching"
+  ..$ purchases   :List of 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24665
+  .. .. ..$ Number  : chr "21031"
+  .. .. ..$ Theme   : chr "Architecture"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Burj Khalifa"
+  .. .. ..$ Pieces  : int 333
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/21031-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25620
+  .. .. ..$ Number  : chr "70588"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Rise of the Villains"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Titanium Ninja Tumbler "
+  .. .. ..$ Pieces  : int 342
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24917
+  .. .. ..$ Number  : chr "70314"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Beast Master's Chaos Chariot"
+  .. .. ..$ Pieces  : int 314
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70314-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24794
+  .. .. ..$ Number  : chr "75135"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Episode III"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Obi-Wan's Jedi Interceptor"
+  .. .. ..$ Pieces  : int 215
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75135-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Brittany"
+  ..$ last_name   : chr "Mclellan"
+  ..$ age         : num 25
+  ..$ phone_number: chr "210-555-0265"
+  ..$ hobbies     : chr "Judo"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24662
+  .. .. ..$ Number  : chr "21026"
+  .. .. ..$ Theme   : chr "Architecture"
+  .. .. ..$ Subtheme: chr "Skylines"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Venice"
+  .. .. ..$ Pieces  : int 212
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/21026-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24717
+  .. .. ..$ Number  : chr "10818"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "My First Truck"
+  .. .. ..$ Pieces  : int 29
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10818-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Joseph"
+  ..$ last_name   : chr "Ross"
+  ..$ age         : num 33
+  ..$ phone_number: chr "254-555-7628"
+  ..$ hobbies     : chr [1:2] "Inline skating" "Herping"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24794
+  .. .. ..$ Number  : chr "75135"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Episode III"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Obi-Wan's Jedi Interceptor"
+  .. .. ..$ Pieces  : int 215
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75135-1.jpg"
+  .. .. ..$ Quantity: num 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24684
+  .. .. ..$ Number  : chr "60117"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Traffic"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Van & Caravan"
+  .. .. ..$ Pieces  : int 250
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60117-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Paige"
+  ..$ last_name   : chr "Wagner"
+  ..$ age         : num 35
+  ..$ phone_number: chr "860-555-1618"
+  ..$ hobbies     : chr [1:2] "Snowboarding" "Aqua-lung"
+  ..$ purchases   :List of 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26038
+  .. .. ..$ Number  : chr "41577"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 9"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Mysto"
+  .. .. ..$ Pieces  : int 64
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24727
+  .. .. ..$ Number  : chr "41176"
+  .. .. ..$ Theme   : chr "Elves"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Secret Market Place"
+  .. .. ..$ Pieces  : int 691
+  .. .. ..$ USPrice : num 60
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41176-1.jpg"
+  .. .. ..$ Quantity: num 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24957
+  .. .. ..$ Number  : chr "71309"
+  .. .. ..$ Theme   : chr "Bionicle"
+  .. .. ..$ Subtheme: chr "Toa"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Onua - Uniter of Earth"
+  .. .. ..$ Pieces  : int 143
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71309-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24798
+  .. .. ..$ Number  : chr "75140"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "The Force Awakens"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Resistance Troop Transporter"
+  .. .. ..$ Pieces  : int 646
+  .. .. ..$ USPrice : num 70
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75140-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Daianaira"
+  ..$ last_name   : chr "Joseph"
+  ..$ age         : num 26
+  ..$ phone_number: chr "714-555-9762"
+  ..$ hobbies     : chr [1:2] "Cooking" "Amateur geology"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25594
+  .. .. ..$ Number  : chr "71011"
+  .. .. ..$ Theme   : chr "Collectable Minifigures"
+  .. .. ..$ Subtheme: chr "Series 15"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "LEGO Minifigures - Series 15 - Sealed Box"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 3.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71011-18.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26058
+  .. .. ..$ Number  : chr "5005059"
+  .. .. ..$ Theme   : chr "Gear"
+  .. .. ..$ Subtheme: chr "Video Games/PS3"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Marvel Avengers PS3 Video Game"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/5005059-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Sean"
+  ..$ last_name   : chr "Cordova"
+  ..$ age         : num 43
+  ..$ phone_number: chr "881-555-7280"
+  ..$ hobbies     : chr [1:2] "Origami" "Scouting"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25004
+  .. .. ..$ Number  : chr "41565"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 8"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Hydro"
+  .. .. ..$ Pieces  : int 70
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41565-1.jpg"
+  .. .. ..$ Quantity: num 5
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25656
+  .. .. ..$ Number  : chr "10804"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Jungle"
+  .. .. ..$ Pieces  : int 86
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10804-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Amber"
+  ..$ last_name   : chr "Terwilliger"
+  ..$ age         : num 35
+  ..$ phone_number: chr "626-555-5321"
+  ..$ hobbies     : chr "Surfing"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24733
+  .. .. ..$ Number  : chr "41118"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Heartlake Supermarket"
+  .. .. ..$ Pieces  : int 313
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41118-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25611
+  .. .. ..$ Number  : chr "21127"
+  .. .. ..$ Theme   : chr "Minecraft"
+  .. .. ..$ Subtheme: chr "Minifig-scale"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Fortress"
+  .. .. ..$ Pieces  : int NA
+  .. .. ..$ USPrice : num 110
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/21127-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Katie"
+  ..$ last_name   : chr "Evering"
+  ..$ age         : num 37
+  ..$ phone_number: chr "882-555-7296"
+  ..$ hobbies     : chr(0) 
+  ..$ purchases   :List of 4
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24659
+  .. .. ..$ Number  : chr "71228"
+  .. .. ..$ Theme   : chr "Dimensions"
+  .. .. ..$ Subtheme: chr "Level Pack"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Level Pack: Ghostbusters"
+  .. .. ..$ Pieces  : int 115
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71228-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 26040
+  .. .. ..$ Number  : chr "41579"
+  .. .. ..$ Theme   : chr "Mixels"
+  .. .. ..$ Subtheme: chr "Series 9"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Camsta"
+  .. .. ..$ Pieces  : int 62
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr ""
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25659
+  .. .. ..$ Number  : chr "75821"
+  .. .. ..$ Theme   : chr "The Angry Birds Movie"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Piggy Car Escape"
+  .. .. ..$ Pieces  : int 74
+  .. .. ..$ USPrice : num 13
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75821-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24765
+  .. .. ..$ Number  : chr "70332"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr "Ultimate"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Ultimate Aaron"
+  .. .. ..$ Pieces  : int 82
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70332-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Nerea"
+  ..$ last_name   : chr "Feldman"
+  ..$ age         : num 28
+  ..$ phone_number: chr "423-555-9631"
+  ..$ hobbies     : chr(0) 
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24805
+  .. .. ..$ Number  : chr "42049"
+  .. .. ..$ Theme   : chr "Technic"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Mine Loader"
+  .. .. ..$ Pieces  : int 476
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/42049-1.jpg"
+  .. .. ..$ Quantity: num 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25921
+  .. .. ..$ Number  : chr "75157"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Rebels"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Captain Rex's AT-TE"
+  .. .. ..$ Pieces  : int 972
+  .. .. ..$ USPrice : num 120
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75157-1.jpg"
+  .. .. ..$ Quantity: num 2
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Julianna"
+  ..$ last_name   : chr "Stephens"
+  ..$ age         : num 34
+  ..$ phone_number: chr "403-555-9991"
+  ..$ hobbies     : chr [1:2] "Trainspotting" "Homebrewing"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24692
+  .. .. ..$ Number  : chr "31044"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Park Animals"
+  .. .. ..$ Pieces  : int 202
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31044-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24797
+  .. .. ..$ Number  : chr "75138"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Episode V"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Hoth Attack"
+  .. .. ..$ Pieces  : int 233
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75138-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Female"
+  ..$ first_name  : chr "Katrina"
+  ..$ last_name   : chr "Clyman"
+  ..$ age         : num 32
+  ..$ phone_number: chr "604-555-3882"
+  ..$ hobbies     : chr(0) 
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24689
+  .. .. ..$ Number  : chr "60129"
+  .. .. ..$ Theme   : chr "City"
+  .. .. ..$ Subtheme: chr "Police"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Police Patrol Boat"
+  .. .. ..$ Pieces  : int 200
+  .. .. ..$ USPrice : num 50
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/60129-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24663
+  .. .. ..$ Number  : chr "21027"
+  .. .. ..$ Theme   : chr "Architecture"
+  .. .. ..$ Subtheme: chr "Skylines"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Berlin"
+  .. .. ..$ Pieces  : int 289
+  .. .. ..$ USPrice : num 30
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/21027-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Male"
+  ..$ first_name: chr "Ramon"
+  ..$ last_name : chr "Walker-Reese"
+  ..$ age       : num 23
+  ..$ hobbies   : chr [1:2] "Basketball" "Videophilia"
+  ..$ purchases :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24796
+  .. .. ..$ Number  : chr "75137"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "Episode V"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Carbon-Freezing Chamber"
+  .. .. ..$ Pieces  : int 231
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75137-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25633
+  .. .. ..$ Number  : chr "70318"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Glob Lobber"
+  .. .. ..$ Pieces  : int 95
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70318-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Brandon"
+  ..$ last_name   : chr "Lopez"
+  ..$ age         : num 21
+  ..$ phone_number: chr "606-555-3903"
+  ..$ hobbies     : chr "Tour skating"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24713
+  .. .. ..$ Number  : chr "10809"
+  .. .. ..$ Theme   : chr "Duplo"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Police Patrol"
+  .. .. ..$ Pieces  : int 15
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/10809-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24660
+  .. .. ..$ Number  : chr "71241"
+  .. .. ..$ Theme   : chr "Dimensions"
+  .. .. ..$ Subtheme: chr "Fun Pack"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fun Pack: Slimer"
+  .. .. ..$ Pieces  : int 33
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71241-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Sagi"
+  ..$ last_name   : chr "Heredia"
+  ..$ age         : num 19
+  ..$ phone_number: chr "989-555-3671"
+  ..$ hobbies     : chr [1:2] "Rappelling" "Gunsmithing"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24898
+  .. .. ..$ Number  : chr "41113"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr "Party"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Party Gift Shop"
+  .. .. ..$ Pieces  : int 52
+  .. .. ..$ USPrice : num 4.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41113-1.jpg"
+  .. .. ..$ Quantity: num 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25640
+  .. .. ..$ Number  : chr "70325"
+  .. .. ..$ Theme   : chr "Nexo Knights"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Infernox captures the Queen"
+  .. .. ..$ Pieces  : int 253
+  .. .. ..$ USPrice : num 25
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70325-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Michael"
+  ..$ last_name   : chr "Cruz"
+  ..$ age         : num 17
+  ..$ phone_number: chr "361-555-8212"
+  ..$ hobbies     : chr "Stone skipping"
+  ..$ purchases   :List of 3
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24723
+  .. .. ..$ Number  : chr "41172"
+  .. .. ..$ Theme   : chr "Elves"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "The Water Dragon Adventure"
+  .. .. ..$ Pieces  : int 212
+  .. .. ..$ USPrice : num 20
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41172-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24618
+  .. .. ..$ Number  : chr "71238"
+  .. .. ..$ Theme   : chr "Dimensions"
+  .. .. ..$ Subtheme: chr "Fun Pack"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Fun Pack: Cyberman"
+  .. .. ..$ Pieces  : int 40
+  .. .. ..$ USPrice : num 15
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/71238-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24920
+  .. .. ..$ Number  : chr "70605"
+  .. .. ..$ Theme   : chr "Ninjago"
+  .. .. ..$ Subtheme: chr "Skybound"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Misfortune's Keep"
+  .. .. ..$ Pieces  : int 754
+  .. .. ..$ USPrice : num 80
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/70605-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 6
+  ..$ gender    : chr "Female"
+  ..$ first_name: chr "Melissa"
+  ..$ last_name : chr "Holmberg"
+  ..$ age       : num 36
+  ..$ hobbies   : chr [1:2] "Sketching" "Metal detecting"
+  ..$ purchases :List of 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24791
+  .. .. ..$ Number  : chr "75132"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "The Force Awakens"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "First Order Battle Pack"
+  .. .. ..$ Pieces  : int 88
+  .. .. ..$ USPrice : num 13
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75132-1.jpg"
+  .. .. ..$ Quantity: num 1
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Cody"
+  ..$ last_name   : chr "Gonzales"
+  ..$ age         : num 44
+  ..$ phone_number: chr "973-555-3236"
+  ..$ hobbies     : chr "Metalworking"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24908
+  .. .. ..$ Number  : chr "42052"
+  .. .. ..$ Theme   : chr "Technic"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Heavy Lift Helicopter"
+  .. .. ..$ Pieces  : int 1042
+  .. .. ..$ USPrice : num 140
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/42052-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 25922
+  .. .. ..$ Number  : chr "75149"
+  .. .. ..$ Theme   : chr "Star Wars"
+  .. .. ..$ Subtheme: chr "The Force Awakens"
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Resistance X-wing Fighter"
+  .. .. ..$ Pieces  : int 740
+  .. .. ..$ USPrice : num 80
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/75149-1.jpg"
+  .. .. ..$ Quantity: num 3
+ $ :List of 7
+  ..$ gender      : chr "Male"
+  ..$ first_name  : chr "Jessie"
+  ..$ last_name   : chr "Barron"
+  ..$ age         : num 37
+  ..$ phone_number: chr "918-555-7552"
+  ..$ hobbies     : chr [1:3] "Skateboarding" "Roller derby" "Kombucha Brewing"
+  ..$ purchases   :List of 2
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24696
+  .. .. ..$ Number  : chr "31050"
+  .. .. ..$ Theme   : chr "Creator"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Corner Deli"
+  .. .. ..$ Pieces  : int 467
+  .. .. ..$ USPrice : num 40
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/31050-1.jpg"
+  .. .. ..$ Quantity: num 1
+  .. ..$ :List of 10
+  .. .. ..$ SetID   : int 24730
+  .. .. ..$ Number  : chr "41115"
+  .. .. ..$ Theme   : chr "Friends"
+  .. .. ..$ Subtheme: chr ""
+  .. .. ..$ Year    : int 2016
+  .. .. ..$ Name    : chr "Emma's Creative Workshop"
+  .. .. ..$ Pieces  : int 108
+  .. .. ..$ USPrice : num 9.99
+  .. .. ..$ ImageURL: chr "http://images.brickset.com/sets/images/41115-1.jpg"
+  .. .. ..$ Quantity: num 1
+  [list output truncated]
